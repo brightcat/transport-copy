@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import za.co.bc.copy.command.BuildCommand;
 import za.co.bc.copy.command.Command;
+import za.co.bc.copy.service.FileService;
 
 public class Main {
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
@@ -45,19 +46,14 @@ public class Main {
         }
     }
     
+    private FileService fileService() {
+        return new FileService();
+    }
+    
     private Hasher getHasher() throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("md5");
-
-        return (Path path) -> {
-            try {
-                final byte[] bytes = Files.readAllBytes(path);
-                final byte[] digest = md.digest(bytes);
-                return digest;
-            } catch (IOException ex) {
-                LOGGER.log(Level.SEVERE, null, ex);
-                return null;
-            }
-        };
+        final Hasher hasher = new SimpleHasher(md, fileService());
+        return hasher;
     }
 
     private HashDb hashDb(OutputStream out) {
